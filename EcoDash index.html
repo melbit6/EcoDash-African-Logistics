@@ -1,886 +1,498 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>EcoDash — African Digital Logistics & Infrastructure Simulator</title>
-<style>
-  :root{
-    --clr-bg:#0d1b12;
-     --clr-panel:#12241a;
-      --clr-accent:#2e8b57; 
-      --clr-accent2:#f4a020;
-    --clr-text:black;
-     --clr-muted:#9fc9ac; 
-     --clr-danger:#e04b3f;
-      --clr-blue:#3aa0c8;
-    box-sizing:border-box;
-     padding-top:env(safe-area-inset-top,0px);
-      padding-bottom:env(safe-area-inset-bottom,0px);
-  }
-  @media (prefers-color-scheme: light){
-    :root:not([data-theme="dark"]){ --clr-bg:#eef6f0; --clr-panel:#ffffff; --clr-text:#12241a; --clr-muted:#4a6a55; }
-  }
-  html{
-     scroll-padding-top:env(safe-area-inset-top,0px); 
-     height:100%; }
-  *{ box-sizing:border-box;}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoDash - African Digital Logistics Simulator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-  body{
-    margin:0; height:100%;
-     background:var(--clr-bg); 
-     color:var(--clr-text);
-    font-family:'Segoe UI',Roboto,Arial,sans-serif; display:flex; flex-direction:column; align-items:center;
-    overflow-x:hidden;
-  }
-  h1{ font-size:1.1rem;
-     margin:10px 0 2px;
-      letter-spacing:0.5px; }
+    body {
+      background-color: #1a1a1a;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
 
-  .subtitle{ color:var(--clr-muted); 
-    font-size:0.78rem; 
-    margin-bottom:8px;
-     text-align:center; 
-     padding:0 12px;}
+    #game-container {
+      position: relative;
+      width: 800px;
+      height: 600px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      border-radius: 8px;
+      overflow: hidden;
+      background-color: #2b2b2b;
+    }
 
-  #gameWrap{ position:relative;
-     width:100%;
-      max-width:900px; 
-      aspect-ratio: 16/10; 
-      margin:0 auto; }
+    canvas {
+      display: block;
+      background: #3e2723;
+    }
 
-  canvas{ width:100%;
-     height:100%;
-      display:block;
-       background:#8fd0a0; 
-       border-radius:10px;
-        touch-action:none; }
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(18, 18, 18, 0.92);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+      z-index: 10;
+    }
 
-  .overlay{
-    position:absolute; 
-    inset:0;
-     display:flex;
-      flex-direction:column;
-       align-items:center; 
-       justify-content:center;
-    background:rgba(10,20,14,0.86);
-     color:black;
-      text-align:center;
-       border-radius:10px; 
-       padding:16px; gap:10px;
-  }
-  .hidden{ display:none !important; }
+    .hidden {
+      display: none !important;
+    }
 
-  .overlay h2{ margin:0;
-     font-size:1.3rem;
-      color:var(--clr-accent2); }
+    h1 {
+      font-size: 3rem;
+      color: #ff9800;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
 
-  .overlay p{ margin:2px 0;
-     font-size:0.85rem; 
-     max-width:440px; 
-     color:black; }
+    h2 {
+      font-size: 2.2rem;
+      color: #f44336;
+      margin-bottom: 15px;
+    }
 
-  button{
-    background:var(--clr-accent); 
-    color:black;
-     border:none; 
-     padding:10px 22px;
-      border-radius:8px;
-    font-size:0.95rem;
-     cursor:pointer;
-      font-weight:600;
-       margin-top:6px;
-  }
+    p {
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+      color: #dddddd;
+    }
 
-  button.secondary{ background:transparent; 
-    border:1px solid var(--clr-muted); 
-    color:var(--clr-muted); }
+    .instructions {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 15px 25px;
+      border-radius: 6px;
+      margin: 15px 0;
+      border-left: 4px solid #ff9800;
+      text-align: left;
+    }
 
-  button:active{ transform:scale(0.97); }
+    .btn {
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #1a1a1a;
+      background-color: #ff9800;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      margin-top: 10px;
+    }
 
-  .statsRow{ display:flex; gap:18px; 
-    margin-top:4px; 
-    flex-wrap:wrap; 
-    justify-content:center; }
-
-  .statBox{ background:var(--clr-panel);
-     padding:6px 14px; border-radius:8px; 
-     font-size:0.8rem; }
-
-  .controlsHint{ font-size:0.72rem;
-     color:var(--clr-muted);
-      margin-top:14px;
-       max-width:420px; }
-
-  #touchControls{ display:flex;
-     gap:10px;
-      margin-top:8px; }
-
-  #touchControls button{ padding:14px 18px; 
-    font-size:1.1rem; }
-  footer{ font-size:0.68rem;
-   color:var(--clr-muted); 
-   margin:10px 0 16px; 
-   
-   text-align:center; padding:0 10px; }
-</style>
+    .btn:hover {
+      background-color: #e68a00;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+    }
+  </style>
 </head>
 <body>
-  <h1>🚁 ECODASH , Powered by Africa, Delivering the Future</h1>
-  <p class="subtitle">Solar-drone logistics simulation · WAS262 Task 2 reference build</p>
 
-  <div id="gameWrap">
-    <canvas id="canvas"></canvas>
+  <div id="game-container">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-    <div id="startScreen" class="overlay">
-      <h2>Mission Briefing</h2>
-      <p>Fly the solar drone across rural infrastructure to deliver medical supplies, food and school
-      materials. Manage your <b>solar battery</b>, dodge potholes, rivers, wildlife and load-shedding
-      zones, and complete deliveries before your energy runs out.</p>
-      <div class="statsRow">
-        <div class="statBox">🏆 Best score: <span id="bestScoreLabel">0</span></div>
-        <div class="statBox">📏 Best distance: <span id="bestDistLabel">0</span> m</div>
+    <!-- Start Overlay Screen -->
+    <div id="start-screen" class="overlay">
+      <h1>ECODASH</h1>
+      <p>African Digital Logistics & Infrastructure Simulator</p>
+      <div class="instructions">
+        <p><strong>Controls:</strong> Arrow Keys / WASD to control movement.</p>
+        <p><strong>Shortcut:</strong> Press 'P' to Pause / Resume simulation.</p>
+        <p><strong>Mission:</strong> Deliver medical supplies while avoiding potholes & load-shedding zones. Recharge at Solar Microgrids!</p>
       </div>
-      <button id="startBtn">Start Mission ▶</button>
-      <p class="controlsHint">
-        Desktop: <b>↑/W</b> thrust · <b>←→ / A D</b> rotate · <b>P</b> pause.<br>
-        Mobile: use the on-screen thrust / rotate buttons below the canvas.
-      </p>
+      <button id="start-btn" class="btn">Start Simulation</button>
     </div>
 
-    <div id="pauseScreen" class="overlay hidden">
-      <h2>Mission Paused</h2>
-      <button id="resumeBtn">Resume ▶</button>
-      <button id="quitBtn" class="secondary">Quit to menu</button>
+    <!-- Pause Overlay Screen -->
+    <div id="pause-screen" class="overlay hidden">
+      <h2>SIMULATION PAUSED</h2>
+      <button id="resume-btn" class="btn">Resume</button>
     </div>
 
-    <div id="gameOverScreen" class="overlay hidden">
-      <h2 id="gameOverTitle">Mission Ended</h2>
-      <p id="gameOverReason"></p>
-      <div class="statsRow">
-        <div class="statBox">⭐ Score: <span id="finalScore">0</span></div>
-        <div class="statBox">📏 Distance: <span id="finalDist">0</span> m</div>
-        <div class="statBox">📦 Deliveries: <span id="finalDeliveries">0</span></div>
-        <div class="statBox">🔋 Efficiency: <span id="finalEfficiency">0</span>%</div>
-      </div>
-      <button id="restartBtn">Restart Mission ↻</button>
+    <!-- Game Over Overlay Screen -->
+    <div id="gameover-screen" class="overlay hidden">
+      <h2>MISSION FAILED</h2>
+      <p id="gameover-reason">Battery Depleted</p>
+      <p>Final Score: <span id="final-score">0</span></p>
+      <p>High Score: <span id="high-score-display">0</span></p>
+      <button id="restart-btn" class="btn">Restart Simulation</button>
     </div>
   </div>
 
-  <div id="touchControls">
-    <button id="tRotL">⟲</button>
-    <button id="tThrust">▲ Thrust</button>
-    <button id="tRotR">⟳</button>
-    <button id="tPause">⏸</button>
-  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. CANVAS & CONTEXT SETUP
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
 
-  <footer>
-    EcoDash reference build for WAS262/SF1 · HTML5 Canvas · Vanilla JavaScript (ES6+) · CSS3 — no external
-    game engines or libraries used, per assignment requirements.
-  </footer>
+      // Game States
+      const STATE = { START: 0, PLAYING: 1, PAUSED: 2, GAMEOVER: 3 };
+      let currentState = STATE.START;
 
-<script>
-'use strict';
-/* ============================================================
-   ECODASH — African Digital Logistics & Infrastructure Simulator
-   HTML5 Canvas + Vanilla JS (ES6+) reference implementation for
-   WAS262/SF1 Task 2 (Game Development).
+      // DOM Elements
+      const startScreen = document.getElementById("start-screen");
+      const pauseScreen = document.getElementById("pause-screen");
+      const gameoverScreen = document.getElementById("gameover-screen");
+      const startBtn = document.getElementById("start-btn");
+      const resumeBtn = document.getElementById("resume-btn");
+      const restartBtn = document.getElementById("restart-btn");
+      const finalScoreEl = document.getElementById("final-score");
+      const highScoreEl = document.getElementById("high-score-display");
+      const gameoverReasonEl = document.getElementById("gameover-reason");
 
-   ------------------------------------------------------------
-   STUDY GUIDE — where to look for common Task 3.3 live-coding
-   challenge requests. Read the code around these lines BEFORE
-   your presentation, not during it — you should be able to say
-   out loud what each line does without looking at this list.
-   ------------------------------------------------------------
-   "Increase obstacle speed"
-     -> Wildlife class, constructor: this.speed = randRange(25,55)
-     -> raise both numbers, e.g. randRange(60,100)
+      // Input Keys Tracking
+      const keys = {};
 
-   "Modify collision behaviour"
-     -> updateGame(), the "Wildlife hit" block: player.vx *= -0.4
-     -> change the bounce multiplier, or change what happens on
-        hit (e.g. also increase GameState.score, or end the game)
+      window.addEventListener("keydown", (e) => {
+        keys[e.key] = true;
 
-   "Change battery consumption"
-     -> Player class: batteryDrainIdle / batteryDrainThrust /
-        batteryRecharge (constructor). These are %/second rates.
+        if ((e.key === "p" || e.key === "P") && currentState === STATE.PLAYING) {
+          pauseGame();
+        } else if ((e.key === "p" || e.key === "P") && currentState === STATE.PAUSED) {
+          resumeGame();
+        }
+      });
 
-   "Add a keyboard shortcut"
-     -> the window.addEventListener('keydown', ...) block near
-        the top of the script. Add another `if (e.key === '?')`
-        line following the existing pattern.
+      window.addEventListener("keyup", (e) => {
+        keys[e.key] = false;
+      });
 
-   "Adjust movement physics"
-     -> Player class: thrustPower (acceleration strength),
-        rotSpeed (turn rate), drag (0-1, closer to 1 = less
-        friction), maxSpeed (velocity cap).
+      // 2. DUST PARTICLE CLASS (ORIGINAL FEATURE)
+      class Particle {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.size = Math.random() * 5 + 2;
+          this.speedX = (Math.random() - 0.5) * 1.5;
+          this.speedY = (Math.random() - 0.5) * 1.5;
+          this.color = "rgba(210, 180, 140, " + Math.random() * 0.6 + ")";
+          this.life = 30;
+        }
 
-   Whatever you change, re-read the surrounding function first —
-   you'll be asked to explain WHY your change produces the effect
-   it does, not just where you typed it.
-   ============================================================ */
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          this.size *= 0.95;
+          this.life--;
+        }
 
-// ---------- Canvas setup ----------
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-let CANVAS_W = 900, CANVAS_H = 560;
+        draw() {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
 
-function resizeCanvas(){
-  const wrap = document.getElementById('gameWrap');
-  const rect = wrap.getBoundingClientRect();
-  CANVAS_W = canvas.width = Math.floor(rect.width);
-  CANVAS_H = canvas.height = Math.floor(rect.height);
-}
-window.addEventListener('resize', resizeCanvas);
+      // 3. PLAYER DRONE CLASS
+      class Player {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.radius = 16;
+          this.vx = 0;
+          this.vy = 0;
+          this.acceleration = 0.4;
+          this.friction = 0.94;
+          this.battery = 100;
+          this.maxBattery = 100;
+          this.batteryDrainRate = 0.05;
+        }
 
-// ---------- Utility math ----------
-const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-const dist = (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1);
-const randRange = (a, b) => a + Math.random() * (b - a);
-const lerp = (a, b, t) => a + (b - a) * t;
+        update() {
+          let ax = 0;
+          let ay = 0;
+          if (keys["ArrowUp"] || keys["w"] || keys["W"]) ay -= this.acceleration;
+          if (keys["ArrowDown"] || keys["s"] || keys["S"]) ay += this.acceleration;
+          if (keys["ArrowLeft"] || keys["a"] || keys["A"]) ax -= this.acceleration;
+          if (keys["ArrowRight"] || keys["d"] || keys["D"]) ax += this.acceleration;
 
-// ---------- Input state ----------
-// Input is just a plain object of booleans — the Player class reads
-// these flags in its update() method every frame. Keeping input
-// detection and physics fully separate like this makes both easier
-// to reason about (and easier to demo live).
-const Input = { up:false, left:false, right:false };
-window.addEventListener('keydown', e => {
-  if (['ArrowUp','w','W'].includes(e.key)) Input.up = true;
-  if (['ArrowLeft','a','A'].includes(e.key)) Input.left = true;
-  if (['ArrowRight','d','D'].includes(e.key)) Input.right = true;
-  if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') togglePause();
-  if (e.key === 'Enter' && GameState.mode === 'start') startMission();
+          this.vx += ax;
+          this.vy += ay;
+          this.vx *= this.friction;
+          this.vy *= this.friction;
 
-  // ADD NEW SHORTCUTS HERE, following the same pattern:
-  //   if (e.key === 'r' || e.key === 'R') { /* your action */ }
-  // e.g. an instant-recharge cheat key, a speed-boost key, or
-  // toggling rain on demand for testing weather effects.
-});
-window.addEventListener('keyup', e => {
-  if (['ArrowUp','w','W'].includes(e.key)) Input.up = false;
-  if (['ArrowLeft','a','A'].includes(e.key)) Input.left = false;
-  if (['ArrowRight','d','D'].includes(e.key)) Input.right = false;
-});
-function bindHold(id, prop){
-  const el = document.getElementById(id);
-  const on = ev => { ev.preventDefault(); Input[prop] = true; };
-  const off = ev => { ev.preventDefault(); Input[prop] = false; };
-  el.addEventListener('touchstart', on); el.addEventListener('touchend', off);
-  el.addEventListener('mousedown', on); el.addEventListener('mouseup', off);
-  el.addEventListener('mouseleave', off);
-}
-bindHold('tThrust','up'); bindHold('tRotL','left'); bindHold('tRotR','right');
-document.getElementById('tPause').addEventListener('click', togglePause);
+          this.x += this.vx;
+          this.y += this.vy;
 
-// ============================================================
-// PARTICLE SYSTEM  (original feature — dust + rain particles)
-// Implemented independently of any AI-generated template: a
-// simple pooled emitter using basic kinematics (pos += vel*dt,
-// alpha fades linearly, size shrinks) — see README "Original
-// Feature" section for the design rationale.
-// ============================================================
-class Particle {
-  constructor(x, y, vx, vy, life, size, color){
-    this.x=x; this.y=y; this.vx=vx; this.vy=vy;
-    this.life=life; this.maxLife=life; this.size=size; this.color=color;
-  }
-  update(dt){
-    this.x += this.vx * dt; this.y += this.vy * dt;
-    this.life -= dt;
-    this.size *= 0.995;
-  }
-  draw(ctx){
-    const a = clamp(this.life / this.maxLife, 0, 1);
-    ctx.globalAlpha = a * 0.8;
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, Math.max(this.size,0.4), 0, Math.PI*2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-}
-class ParticleSystem {
-  constructor(){ this.particles = []; }
-  emitDust(x, y, angle){
-    for (let i=0;i<2;i++){
-      const spread = angle + Math.PI + randRange(-0.5,0.5);
-      const speed = randRange(10,40);
-      this.particles.push(new Particle(
-        x, y, Math.cos(spread)*speed, Math.sin(spread)*speed,
-        randRange(0.4,0.9), randRange(1.5,3.5), 'rgba(196,160,90,0.9)'
-      ));
-    }
-  }
-  emitRain(){
-    if (this.particles.length > 260) return;
-    this.particles.push(new Particle(
-      Math.random()*CANVAS_W, -10, randRange(-20,-40), randRange(240,320),
-      2.2, randRange(1,2), 'rgba(150,200,230,0.55)'
-    ));
-  }
-  update(dt){
-    for (const p of this.particles) p.update(dt);
-    this.particles = this.particles.filter(p => p.life > 0 && p.y < CANVAS_H + 20);
-  }
-  draw(ctx){ for (const p of this.particles) p.draw(ctx); }
-}
-const particles = new ParticleSystem();
+          if (this.x - this.radius < 0) { this.x = this.radius; this.vx = 0; }
+          if (this.x + this.radius > canvas.width) { this.x = canvas.width - this.radius; this.vx = 0; }
+          if (this.y - this.radius < 0) { this.y = this.radius; this.vy = 0; }
+          if (this.y + this.radius > canvas.height) { this.y = canvas.height - this.radius; this.vy = 0; }
 
-// ============================================================
-// WEATHER SYSTEM
-// ============================================================
-const Weather = {
-  wind: {x:0, y:0},
-  isRaining:false,
-  visibilityRadius: 260,
-  timer:0,
-  update(dt){
-    this.timer += dt;
-    if (this.timer > 14){
-      this.timer = 0;
-      this.isRaining = Math.random() < 0.4;
-      const windAngle = Math.random()*Math.PI*2;
-      const windStrength = this.isRaining ? randRange(18,34) : randRange(0,14);
-      this.wind.x = Math.cos(windAngle)*windStrength;
-      this.wind.y = Math.sin(windAngle)*windStrength;
-      this.visibilityRadius = this.isRaining ? 150 : 260;
-    }
-    if (this.isRaining) particles.emitRain();
-  }
-};
+          const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+          if (speed > 0.1) {
+            this.battery -= this.batteryDrainRate;
+            particles.push(new Particle(this.x, this.y));
+          }
 
-// ============================================================
-// PLAYER — Solar Drone
-// Vector & trig-based movement: thrust is applied along the
-// drone's heading using cos()/sin(); drag opposes velocity;
-// battery depletes with thrust use and recharges in solar zones.
-// ============================================================
-class Player {
-  constructor(){
-    // Position: where the drone is drawn on the canvas, in pixels.
-    this.x = 100; this.y = 100;
+          if (this.battery <= 0) {
+            this.battery = 0;
+            endGame("Battery Depleted! Mission Failed.");
+          }
+        }
 
-    // angle is the drone's HEADING in radians (0 = pointing right,
-    // Math.PI/2 = pointing down, since canvas Y grows downward).
-    // This single number drives all the trig-based movement below.
-    this.angle = 0;
+        draw() {
+          ctx.save();
+          ctx.translate(this.x, this.y);
 
-    // Velocity: how fast (and in which direction) the drone is
-    // ALREADY moving, independent of where it's pointing right now.
-    // This is what makes movement feel like a vehicle with momentum
-    // instead of teleporting in whatever direction you press.
-    this.vx = 0; this.vy = 0;
+          const angle = Math.atan2(this.vy, this.vx);
+          ctx.rotate(angle);
 
-    // --- Tunable physics constants: change these for "adjust
-    // movement physics" challenges. Each is explained below. ---
-    this.thrustPower = 160;    // px/s^2 — how hard one frame of
-                                // holding "thrust" accelerates you.
-                                // Bigger number = snappier, twitchier control.
-    this.rotSpeed = 2.6;       // rad/s — how fast the drone can turn.
-                                // Bigger number = tighter turning circle.
-    this.drag = 0.985;         // velocity multiplier applied EVERY
-                                // frame (see update()). Must stay
-                                // between 0 and 1. Closer to 1.0 =
-                                // glides further before slowing down
-                                // (icy). Closer to 0 = stops almost
-                                // instantly (heavy friction).
-    this.maxSpeed = 220;       // hard cap so thrust can't make the
-                                // drone accelerate forever.
-    this.radius = 14;          // used for collision checks below.
+          ctx.fillStyle = "#ff9800";
+          ctx.beginPath();
+          ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+          ctx.fill();
 
-    // --- Battery / resource system ---
-    this.battery = 100;
-    this.maxBattery = 100;
-    this.batteryDrainIdle = 1.2;   // %/s just staying airborne — change
-                                    // this for "change battery consumption".
-    this.batteryDrainThrust = 6.0; // %/s EXTRA while thrust key is held
-    this.batteryRecharge = 22;     // %/s while inside an active solar zone
-    this.slowFactor = 1;           // multiplier obstacles like rivers set
-                                    // on the drag calculation (see update())
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(-22, -22, 10, 10);
+          ctx.fillRect(12, -22, 10, 10);
+          ctx.fillRect(-22, 12, 10, 10);
+          ctx.fillRect(12, 12, 10, 10);
 
-    // --- Stats tracked purely for the HUD/score, not physics ---
-    this.distanceTravelled = 0;
-    this.energyUsed = 0;
-  }
-  // Called once per animation frame (see the main loop() function
-  // near the bottom). "dt" = delta-time = seconds since the last
-  // frame (usually ~0.016 for 60fps). EVERY rate in this class is
-  // written as "amount per second" and then multiplied by dt here
-  // — that's what makes the game run at the same real-world speed
-  // whether the browser manages 30fps or 120fps.
-  update(dt){
-    // --- 1. Rotation: turning does NOT move the drone, it only
-    // changes the heading angle that thrust will use next. ---
-    if (Input.left) this.angle -= this.rotSpeed * dt;
-    if (Input.right) this.angle += this.rotSpeed * dt;
+          ctx.restore();
+        }
+      }
 
-    // --- 2. Thrust: this is the trigonometry the rubric asks for.
-    // cos(angle) and sin(angle) turn "a direction" into "how much
-    // of that push goes sideways (x) vs down/up (y)". E.g. if
-    // angle = 0 (facing right), cos(0)=1, sin(0)=0, so thrust is
-    // 100% horizontal. If angle = PI/2 (facing down), cos=0, sin=1,
-    // so thrust is 100% vertical. ---
-    let thrusting = false;
-    if (Input.up && this.battery > 0){
-      thrusting = true;
-      const ax = Math.cos(this.angle) * this.thrustPower; // horizontal accel
-      const ay = Math.sin(this.angle) * this.thrustPower; // vertical accel
-      // Acceleration changes VELOCITY (not position directly) —
-      // this is what gives the drone momentum/inertia.
-      this.vx += ax * dt;
-      this.vy += ay * dt;
-      particles.emitDust(this.x, this.y + this.radius*0.6, this.angle);
-    }
+      // 4. OBSTACLE CLASS
+      class Obstacle {
+        constructor(x, y, type) {
+          this.x = x;
+          this.y = y;
+          this.type = type;
+          this.radius = type === "pothole" ? 22 : 35;
+          this.speed = Math.random() * 1.5 + 1;
+        }
 
-    // --- 3. Wind: Weather.wind is a vector (x,y) re-rolled every
-    // ~14s by the Weather system. Blending it in at a small factor
-    // (0.12) each frame means it nudges you gradually rather than
-    // yanking the drone sideways instantly. ---
-    this.vx += Weather.wind.x * 0.12 * dt;
-    this.vy += Weather.wind.y * 0.12 * dt;
+        update() {
+          this.y += this.speed;
+          if (this.y - this.radius > canvas.height) {
+            this.y = -this.radius;
+            this.x = Math.random() * (canvas.width - 100) + 50;
+          }
+        }
 
-    // --- 4. Drag: multiplying velocity by a number just under 1
-    // every frame makes it decay EXPONENTIALLY (like real friction/
-    // air resistance) rather than stopping abruptly. slowFactor is
-    // normally 1 (drag as-is); rivers raise it (see updateGame())
-    // so Math.pow(drag, slowFactor) becomes a SMALLER multiplier,
-    // i.e. stronger braking, while inside the river. ---
-    const effectiveDrag = Math.pow(this.drag, this.slowFactor);
-    this.vx *= effectiveDrag;
-    this.vy *= effectiveDrag;
+        draw() {
+          ctx.save();
+          if (this.type === "pothole") {
+            ctx.fillStyle = "#1c120c";
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#8d6e63";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+          } else {
+            ctx.fillStyle = "rgba(33, 33, 33, 0.75)";
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#f44336";
+            ctx.setLineDash([4, 4]);
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      }
 
-    // --- 5. Speed cap: hypot(vx,vy) is just Pythagoras — the
-    // straight-line speed regardless of direction. If it's over
-    // the limit, scale both components down by the same ratio so
-    // direction is preserved but magnitude is clamped. ---
-    const speed = Math.hypot(this.vx, this.vy);
-    if (speed > this.maxSpeed){
-      const s = this.maxSpeed / speed;
-      this.vx *= s; this.vy *= s;
-    }
+      // 5. SOLAR MICROGRID RECHARGE STATION
+      class SolarMicrogrid {
+        constructor() {
+          this.x = Math.random() * (canvas.width - 120) + 60;
+          this.y = Math.random() * (canvas.height - 120) + 60;
+          this.radius = 30;
+        }
 
-    // --- 6. Apply velocity to position (this is the actual
-    // "move" step — everything above only changed vx/vy). ---
-    const prevX = this.x, prevY = this.y;
-    this.x += this.vx * dt;
-    this.y += this.vy * dt;
-    this.distanceTravelled += dist(prevX, prevY, this.x, this.y);
+        draw() {
+          ctx.save();
+          ctx.fillStyle = "rgba(76, 175, 80, 0.3)";
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius + 5, 0, Math.PI * 2);
+          ctx.fill();
 
-    // Keep the drone on-screen instead of flying off the canvas.
-    this.x = clamp(this.x, this.radius, CANVAS_W - this.radius);
-    this.y = clamp(this.y, this.radius, CANVAS_H - this.radius);
+          ctx.fillStyle = "#4caf50";
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fill();
 
-    // --- 7. Battery: idle drain always applies (scaled by
-    // slowFactor, so river crossings also cost more energy);
-    // thrust drain only applies while actively accelerating. ---
-    let drain = this.batteryDrainIdle * this.slowFactor;
-    if (thrusting) drain += this.batteryDrainThrust;
-    this.battery -= drain * dt;
-    this.energyUsed += drain * dt;
-    this.battery = clamp(this.battery, 0, this.maxBattery);
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 12px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("SOLAR", this.x, this.y - 2);
+          ctx.fillText("GRID", this.x, this.y + 12);
+          ctx.restore();
+        }
+      }
 
-    // Reset slowFactor every frame — obstacles that overlap the
-    // player will set it again in updateGame() before the NEXT
-    // frame's update() runs. Without this reset, driving through
-    // a river once would slow you down forever.
-    this.slowFactor = 1;
-  }
-  recharge(dt){
-    this.battery = clamp(this.battery + this.batteryRecharge * dt, 0, this.maxBattery);
-  }
-  draw(ctx){
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.angle);
-    // body
-    ctx.fillStyle = '#1f6b3a';
-    ctx.beginPath();
-    ctx.ellipse(0,0, this.radius, this.radius*0.7, 0, 0, Math.PI*2);
-    ctx.fill();
-    // nose indicator
-    ctx.fillStyle = '#f4a020';
-    ctx.beginPath();
-    ctx.moveTo(this.radius, 0);
-    ctx.lineTo(this.radius-6, -5);
-    ctx.lineTo(this.radius-6, 5);
-    ctx.closePath();
-    ctx.fill();
-    // rotor blur
-    ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(-6,-10, 8, 0, Math.PI*2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(-6, 10, 8, 0, Math.PI*2); ctx.stroke();
-    ctx.restore();
-  }
-}
+      // GLOBAL GAME VARIABLES
+      let player;
+      let obstacles = [];
+      let solarGrid;
+      let particles = [];
+      let score = 0;
+      let distanceTravelled = 0;
 
-// ============================================================
-// OBSTACLES & ZONES  (AABB + circular collision)
-// ============================================================
-class Pothole { // static AABB hazard — damages battery on hit
-  constructor(x,y){ this.x=x; this.y=y; this.w=36; this.h=24; this.type='pothole'; }
-  aabb(){ return {x:this.x-this.w/2, y:this.y-this.h/2, w:this.w, h:this.h}; }
-  draw(ctx){
-    ctx.fillStyle = '#4a3a2a';
-    ctx.beginPath();
-    ctx.ellipse(this.x, this.y, this.w/2, this.h/2, 0, 0, Math.PI*2);
-    ctx.fill();
-  }
-}
-class River { // rect zone — increases drag + drains battery faster
-  constructor(x,y,w,h){ this.x=x; this.y=y; this.w=w; this.h=h; this.type='river'; }
-  aabb(){ return {x:this.x, y:this.y, w:this.w, h:this.h}; }
-  draw(ctx){
-    ctx.fillStyle = 'rgba(58,160,200,0.55)';
-    ctx.fillRect(this.x, this.y, this.w, this.h);
-  }
-}
-class Wildlife { // moving circular obstacle
-  constructor(x,y){
-    this.x=x; this.y=y; this.radius=12;
-    this.dir = Math.random()*Math.PI*2;
-    this.speed = randRange(25,55);
-    this.changeTimer = 0;
-    this.type='wildlife';
-  }
-  update(dt){
-    this.changeTimer += dt;
-    if (this.changeTimer > 2){ this.dir += randRange(-1,1); this.changeTimer = 0; }
-    this.x += Math.cos(this.dir)*this.speed*dt;
-    this.y += Math.sin(this.dir)*this.speed*dt;
-    if (this.x < 20 || this.x > CANVAS_W-20) this.dir = Math.PI - this.dir;
-    if (this.y < 20 || this.y > CANVAS_H-20) this.dir = -this.dir;
-  }
-  draw(ctx){
-    ctx.fillStyle = '#8a5a2a';
-    ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#5a3a1a';
-    ctx.fillRect(this.x-3, this.y-16, 2, 8); ctx.fillRect(this.x+3, this.y-16, 2, 8);
-  }
-}
-class SolarZone { // circular recharge zone; can be disabled by load-shedding
-  constructor(x,y){ this.x=x; this.y=y; this.radius=42; this.active=true; this.type='solar'; }
-  draw(ctx){
-    ctx.fillStyle = this.active ? 'rgba(244,160,32,0.28)' : 'rgba(120,120,120,0.25)';
-    ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = this.active ? '#f4a020' : '#777';
-    ctx.setLineDash([4,4]);
-    ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle = '#fff';
-    ctx.font='11px sans-serif'; ctx.textAlign='center';
-    ctx.fillText(this.active ? '☀ Solar Microgrid' : '⚡ Load-shed', this.x, this.y+4);
-  }
-}
-class LoadSheddingZone { // periodically disables nearby solar zones
-  constructor(zones){
-    this.zones = zones; this.timer = 0; this.sheddingOn = false;
-  }
-  update(dt){
-    this.timer += dt;
-    if (this.timer > 10){
-      this.timer = 0;
-      this.sheddingOn = !this.sheddingOn;
-      this.zones.forEach(z => z.active = !this.sheddingOn);
-    }
-  }
-}
-class DeliveryTarget {
-  constructor(x,y,label){ this.x=x; this.y=y; this.radius=20; this.label=label; }
-  draw(ctx){
-    ctx.fillStyle = 'rgba(224,75,63,0.25)';
-    ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle = '#e04b3f'; ctx.lineWidth=2; ctx.stroke();
-    ctx.fillStyle = '#fff'; ctx.font='11px sans-serif'; ctx.textAlign='center';
-    ctx.fillText('📦 '+this.label, this.x, this.y - this.radius - 6);
-  }
-}
+      function init() {
+        player = new Player(canvas.width / 2, canvas.height - 80);
+        solarGrid = new SolarMicrogrid();
+        obstacles = [
+          new Obstacle(150, -50, "pothole"),
+          new Obstacle(350, -150, "loadshedding"),
+          new Obstacle(550, -100, "pothole"),
+          new Obstacle(700, -250, "loadshedding")
+        ];
+        particles = [];
+        score = 0;
+        distanceTravelled = 0;
+      }
 
-const DELIVERY_NAMES = ['Village Clinic','Rural School','Community Hub','Market'];
+      function checkCircleCollision(circle1, circle2) {
+        const dx = circle1.x - circle2.x;
+        const dy = circle1.y - circle2.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < circle1.radius + circle2.radius;
+      }
 
-// ============================================================
-// GAME STATE
-// ============================================================
-const GameState = {
-  mode: 'start', // start | playing | paused | gameover
-  score: 0,
-  deliveries: 0,
-  frame: 0,
-  elapsed: 0,
-  reason: ''
-};
+      function updateGame() {
+        if (currentState !== STATE.PLAYING) return;
 
-let player, potholes, rivers, wildlifeList, solarZones, loadShed, target;
+        player.update();
 
-function buildWorld(){
-  player = new Player();
-  player.x = 70; player.y = CANVAS_H/2;
+        for (let i = particles.length - 1; i >= 0; i--) {
+          particles[i].update();
+          if (particles[i].life <= 0) {
+            particles.splice(i, 1);
+          }
+        }
 
-  potholes = [];
-  for (let i=0;i<6;i++) potholes.push(new Pothole(randRange(150,CANVAS_W-80), randRange(40,CANVAS_H-40)));
+        distanceTravelled += 0.1;
+        score = Math.floor(distanceTravelled * 10);
 
-  rivers = [ new River(CANVAS_W*0.45, 0, 46, CANVAS_H*0.55),
-             new River(CANVAS_W*0.72, CANVAS_H*0.4, 46, CANVAS_H*0.6) ];
+        if (checkCircleCollision(player, solarGrid)) {
+          player.battery = Math.min(player.maxBattery, player.battery + 0.4);
+        }
 
-  wildlifeList = [];
-  for (let i=0;i<4;i++) wildlifeList.push(new Wildlife(randRange(200,CANVAS_W-60), randRange(60,CANVAS_H-60)));
+        obstacles.forEach(obs => {
+          obs.update();
+          if (checkCircleCollision(player, obs)) {
+            if (obs.type === "pothole") {
+              endGame("Drone Damaged by Pothole!");
+            } else if (obs.type === "loadshedding") {
+              player.battery -= 0.5;
+            }
+          }
+        });
+      }
 
-  solarZones = [ new SolarZone(CANVAS_W*0.3, CANVAS_H*0.2),
-                 new SolarZone(CANVAS_W*0.6, CANVAS_H*0.75),
-                 new SolarZone(CANVAS_W*0.85, CANVAS_H*0.25) ];
+      function drawHUD() {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+        ctx.fillRect(15, 15, 180, 24);
 
-  loadShed = new LoadSheddingZone(solarZones);
-  target = spawnTarget();
+        const fillWidth = (player.battery / player.maxBattery) * 176;
+        ctx.fillStyle = player.battery > 30 ? "#4caf50" : "#f44336";
+        ctx.fillRect(17, 17, fillWidth, 20);
 
-  GameState.score = 0; GameState.deliveries = 0; GameState.frame = 0; GameState.elapsed = 0;
-  Weather.isRaining = false; Weather.wind = {x:0,y:0}; Weather.timer = 0;
-  particles.particles = [];
-}
-function spawnTarget(){
-  const label = DELIVERY_NAMES[Math.floor(Math.random()*DELIVERY_NAMES.length)];
-  return new DeliveryTarget(randRange(120, CANVAS_W-60), randRange(50, CANVAS_H-50), label);
-}
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 12px sans-serif";
+        ctx.fillText(`BATTERY: ${Math.floor(player.battery)}%`, 25, 31);
 
-// ---------- Collision helpers ----------
-// The player is always treated as a CIRCLE (position + radius),
-// so both helpers below take a circle as one side of the check.
+        ctx.textAlign = "right";
+        ctx.font = "bold 16px sans-serif";
+        ctx.fillText(`SCORE: ${score}`, canvas.width - 20, 32);
+        ctx.fillText(`DISTANCE: ${Math.floor(distanceTravelled)}m`, canvas.width - 20, 55);
+      }
 
-// Circle vs. rectangle (AABB = "axis-aligned bounding box", i.e.
-// a rectangle that isn't rotated — used for potholes and rivers).
-// Trick: find the point ON the rectangle that's closest to the
-// circle's centre (clamp the centre's x/y into the box's range),
-// then it's just a circle-vs-point distance check.
-function circleIntersectsAABB(cx, cy, cr, box){
-  const closestX = clamp(cx, box.x, box.x+box.w);
-  const closestY = clamp(cy, box.y, box.y+box.h);
-  return dist(cx,cy,closestX,closestY) < cr;
-}
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-// Circle vs. circle (used for wildlife, solar zones, delivery
-// targets). Two circles overlap if the distance between their
-// centres is less than the SUM of their radii — no rectangles
-// involved, which is why this is cheaper/simpler than AABB checks.
-function circleIntersectsCircle(x1,y1,r1,x2,y2,r2){
-  return dist(x1,y1,x2,y2) < (r1+r2);
-}
+        // Terrain Grid
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+        ctx.lineWidth = 1;
+        for (let x = 0; x < canvas.width; x += 40) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, canvas.height);
+          ctx.stroke();
+        }
 
-// ============================================================
-// SCORE / LOCAL STORAGE
-// ============================================================
-const STORAGE_KEY_SCORE = 'ecodash_best_score';
-const STORAGE_KEY_DIST = 'ecodash_best_distance';
-function loadBest(){
-  try {
-    return {
-      score: Number(localStorage.getItem(STORAGE_KEY_SCORE)) || 0,
-      dist: Number(localStorage.getItem(STORAGE_KEY_DIST)) || 0
-    };
-  } catch(e){ return {score:0, dist:0}; }
-}
-function saveBest(score, distTravelled){
-  try {
-    const best = loadBest();
-    if (score > best.score) localStorage.setItem(STORAGE_KEY_SCORE, String(score));
-    if (distTravelled > best.dist) localStorage.setItem(STORAGE_KEY_DIST, String(Math.round(distTravelled)));
-  } catch(e){ /* localStorage unavailable — game still playable */ }
-}
-function refreshStartScreenStats(){
-  const b = loadBest();
-  document.getElementById('bestScoreLabel').textContent = b.score;
-  document.getElementById('bestDistLabel').textContent = b.dist;
-}
+        particles.forEach(p => p.draw());
 
-// ============================================================
-// UPDATE LOOP
-// ============================================================
-function updateGame(dt){
-  GameState.frame++;
-  GameState.elapsed += dt;
-  Weather.update(dt);
+        if (currentState === STATE.PLAYING || currentState === STATE.PAUSED) {
+          solarGrid.draw();
+          obstacles.forEach(obs => obs.draw());
+          player.draw();
+          drawHUD();
+        }
+      }
 
-  player.update(dt);
-  wildlifeList.forEach(w => w.update(dt));
-  loadShed.update(dt);
-  particles.update(dt);
+      function gameLoop() {
+        updateGame();
+        render();
+        requestAnimationFrame(gameLoop);
+      }
 
-  // Each block below is: (1) detect overlap with the AABB/circle
-  // helpers above, then (2) decide what happens as a RESPONSE. The
-  // detection and the response are separate on purpose — for a
-  // "modify collision behaviour" challenge you'll almost always be
-  // changing the response (the lines INSIDE the if-block), not the
-  // detection math itself.
+      function startGame() {
+        init();
+        currentState = STATE.PLAYING;
+        startScreen.classList.add("hidden");
+        gameoverScreen.classList.add("hidden");
+        pauseScreen.classList.add("hidden");
+      }
 
-  // River drag: no damage, just makes slowFactor bigger for this
-  // frame, which update() reads to strengthen drag (see above).
-  let inRiver = false;
-  for (const r of rivers){
-    if (circleIntersectsAABB(player.x, player.y, player.radius, r.aabb())){
-      player.slowFactor = 2.4; inRiver = true; // try raising this number
-    }
-  }
-  // Pothole hit: instant battery penalty, then the pothole is
-  // REMOVED from the array (.splice) so you can't be hit by the
-  // same one twice — it's a one-time hazard, not a persistent zone.
-  for (const p of potholes.slice()){ // .slice() = loop over a COPY,
-                                      // since we're modifying the
-                                      // real array inside the loop
-    if (circleIntersectsAABB(player.x, player.y, player.radius, p.aabb())){
-      player.battery = clamp(player.battery - 14, 0, 100); // <- damage amount
-      potholes.splice(potholes.indexOf(p), 1); // consumed on impact
-    }
-  }
-  // Wildlife hit: bounces the drone backward (reversing and
-  // shrinking velocity) plus a smaller battery penalty than a
-  // pothole, since wildlife keeps moving and could be hit again.
-  for (const w of wildlifeList){
-    if (circleIntersectsCircle(player.x, player.y, player.radius, w.x, w.y, w.radius)){
-      player.vx *= -0.4; player.vy *= -0.4; // <- bounce strength/direction
-      player.battery = clamp(player.battery - 8, 0, 100); // <- damage amount
-    }
-  }
-  // Solar zone recharge
-  for (const z of solarZones){
-    if (z.active && circleIntersectsCircle(player.x, player.y, player.radius, z.x, z.y, z.radius)){
-      player.recharge(dt);
-    }
-  }
-  // Delivery target reached
-  if (dist(player.x, player.y, target.x, target.y) < target.radius){
-    GameState.deliveries++;
-    GameState.score += 100;
-    target = spawnTarget();
-  }
+      function pauseGame() {
+        currentState = STATE.PAUSED;
+        pauseScreen.classList.remove("hidden");
+      }
 
-  // Score also grows slowly with distance (encourages movement, not just idling)
-  GameState.score += dt * 1.5;
+      function resumeGame() {
+        currentState = STATE.PLAYING;
+        pauseScreen.classList.add("hidden");
+      }
 
-  // End conditions
-  if (player.battery <= 0){
-    endMission('Your solar battery ran out over open terrain.');
-  }
-}
+      function endGame(reason) {
+        currentState = STATE.GAMEOVER;
 
-function endMission(reason){
-  GameState.mode = 'gameover';
-  GameState.reason = reason;
-  const efficiency = player.distanceTravelled > 0
-    ? clamp(100 - (player.energyUsed / Math.max(player.distanceTravelled,1)) * 40, 0, 100)
-    : 0;
-  document.getElementById('gameOverReason').textContent = reason;
-  document.getElementById('finalScore').textContent = Math.round(GameState.score);
-  document.getElementById('finalDist').textContent = Math.round(player.distanceTravelled);
-  document.getElementById('finalDeliveries').textContent = GameState.deliveries;
-  document.getElementById('finalEfficiency').textContent = Math.round(efficiency);
-  saveBest(Math.round(GameState.score), player.distanceTravelled);
-  show('gameOverScreen');
-}
+        const currentHighScore = localStorage.getItem("ecoDash_highScore") || 0;
+        if (score > currentHighScore) {
+          localStorage.setItem("ecoDash_highScore", score);
+        }
 
-// ============================================================
-// RENDER
-// ============================================================
-function drawBackground(){
-  ctx.fillStyle = '#8fd0a0';
-  ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
-  // simple road grid to suggest rural terrain
-  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-  for (let x=0;x<CANVAS_W;x+=60){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,CANVAS_H); ctx.stroke(); }
-}
-function drawHUD(){
-  const pad=10;
-  ctx.fillStyle='rgba(13,27,18,0.75)';
-  ctx.fillRect(pad,pad,220,86);
-  ctx.fillStyle='#eafbf0'; ctx.font='12px sans-serif'; ctx.textAlign='left';
-  ctx.fillText('⭐ Score: ' + Math.round(GameState.score), pad+10, pad+18);
-  ctx.fillText('📦 Deliveries: ' + GameState.deliveries, pad+10, pad+34);
-  ctx.fillText('📏 Distance: ' + Math.round(player.distanceTravelled) + ' m', pad+10, pad+50);
-  ctx.fillText('🎞 Frame: ' + GameState.frame, pad+10, pad+66);
+        gameoverReasonEl.textContent = reason;
+        finalScoreEl.textContent = score;
+        highScoreEl.textContent = localStorage.getItem("ecoDash_highScore") || score;
+        gameoverScreen.classList.remove("hidden");
+      }
 
-  // battery bar
-  const bx=pad+10, by=pad+72, bw=190, bh=8;
-  ctx.strokeStyle='#eafbf0'; ctx.strokeRect(bx,by,bw,bh);
-  const pct = player.battery/player.maxBattery;
-  ctx.fillStyle = pct>0.3 ? '#2e8b57' : '#e04b3f';
-  ctx.fillRect(bx,by,bw*pct,bh);
+      // Event Listeners
+      startBtn.addEventListener("click", startGame);
+      resumeBtn.addEventListener("click", resumeGame);
+      restartBtn.addEventListener("click", startGame);
 
-  if (Weather.isRaining){
-    ctx.fillStyle='rgba(58,160,200,0.85)';
-    ctx.textAlign='right';
-    ctx.fillText('🌧 Rain — visibility reduced', CANVAS_W-10, pad+18);
-  }
-}
-function drawFogOfWar(){
-  if (!Weather.isRaining) return;
-  ctx.save();
-  ctx.globalCompositeOperation = 'multiply';
-  const g = ctx.createRadialGradient(player.x, player.y, Weather.visibilityRadius*0.3,
-                                      player.x, player.y, Weather.visibilityRadius);
-  g.addColorStop(0,'rgba(255,255,255,1)');
-  g.addColorStop(1,'rgba(90,110,120,0.55)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
-  ctx.restore();
-}
-
-function render(){
-  drawBackground();
-  solarZones.forEach(z => z.draw(ctx));
-  rivers.forEach(r => r.draw(ctx));
-  potholes.forEach(p => p.draw(ctx));
-  target.draw(ctx);
-  wildlifeList.forEach(w => w.draw(ctx));
-  particles.draw(ctx);
-  player.draw(ctx);
-  drawFogOfWar();
-  drawHUD();
-}
-
-// ============================================================
-// MAIN LOOP
-// ============================================================
-let lastTime = performance.now();
-function loop(now){
-  const dt = Math.min((now - lastTime) / 1000, 0.05);
-  lastTime = now;
-  if (GameState.mode === 'playing'){
-    updateGame(dt);
-  }
-  render();
-  requestAnimationFrame(loop);
-}
-
-// ============================================================
-// UI STATE HELPERS
-// ============================================================
-function show(id){
-  ['startScreen','pauseScreen','gameOverScreen'].forEach(s => {
-    document.getElementById(s).classList.toggle('hidden', s !== id);
-  });
-}
-function hideAllOverlays(){
-  ['startScreen','pauseScreen','gameOverScreen'].forEach(s => document.getElementById(s).classList.add('hidden'));
-}
-function startMission(){
-  resizeCanvas();
-  buildWorld();
-  GameState.mode = 'playing';
-  hideAllOverlays();
-}
-function togglePause(){
-  if (GameState.mode === 'playing'){ GameState.mode = 'paused'; show('pauseScreen'); }
-  else if (GameState.mode === 'paused'){ GameState.mode = 'playing'; hideAllOverlays(); }
-}
-document.getElementById('startBtn').addEventListener('click', startMission);
-document.getElementById('resumeBtn').addEventListener('click', togglePause);
-document.getElementById('quitBtn').addEventListener('click', () => {
-  GameState.mode = 'start'; refreshStartScreenStats(); show('startScreen');
-});
-document.getElementById('restartBtn').addEventListener('click', startMission);
-
-// ---------- Boot ----------
-resizeCanvas();
-buildWorld();
-refreshStartScreenStats();
-requestAnimationFrame(loop);
-</script>
+      // Start the animation loop
+      requestAnimationFrame(gameLoop);
+    });
+  </script>
 </body>
 </html>
+
