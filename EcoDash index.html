@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>EcoDash — African Digital Logistics & Infrastructure Simulator</title>
   <style>
-    /* -------------------------------------------------------------
-       CSS VARIABLES & THEME SETUP
-       ------------------------------------------------------------- */
+    /* CSS VARIABLES & THEME SETUP*/
     :root {
       --clr-bg: #0d1b12;
       --clr-panel: #12241a;
@@ -96,7 +94,7 @@
     }
 
     /* -------------------------------------------------------------
-       UI OVERLAYS (Start, Pause, Game Over Screens)
+       UIOVERLAYS (Start, Pause, Game Over Screens)
        ------------------------------------------------------------- */
     .overlay {
       position: absolute;
@@ -200,17 +198,17 @@
 </head>
 <body>
 
-  <!-- Semantic Page Header -->
+  // Semantic Page Header// 
   <header>
     <h1>🚁 ECODASH — Powered by Africa, Delivering the Future</h1>
-    <p class="subtitle">Solar-drone logistics simulation · WAS262 Task 2 reference build</p>
+    <p class="subtitle">Solar-drone logistics simulation , WAS262 Task 2 reference build</p>
   </header>
 
-  <!-- Main Game Container -->
+  //Main Game Container//
   <main id="gameWrap">
     <canvas id="canvas"></canvas>
 
-    <!-- Start Screen Overlay -->
+    //Start Screen Overlay// 
     <div id="startScreen" class="overlay">
       <h2>Mission Briefing</h2>
       <p>
@@ -232,7 +230,7 @@
       </p>
     </div>
 
-    <!-- Pause Screen Overlay -->
+    //Pause screen overlay//
     <div id="pauseScreen" class="overlay hidden">
       <h2>Mission Paused</h2>
       <button id="resumeBtn" type="button">Resume ▶</button>
@@ -270,22 +268,18 @@
 <script>
 'use strict';
 
-/**
- * ECODASH — African Digital Logistics & Infrastructure Simulator
- * Architecture: Object-Oriented HTML5 Canvas Engine (No External Libraries)
- */
+/* ECODASH — African Digital Logistics & Infrastructure Simulator*/
 
-// =============================================================================
-// 1. CANVAS & SCREEN RESIZING
-// =============================================================================
+
+// 1. CANVAS & SCREEN RESIZING//
+
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 let canvasWidth = 900;
 let canvasHeight = 560;
 
-/**
- * Dynamically resizes internal canvas resolution to match its CSS display dimensions.
- */
+
+ /* Dynamically resizes internal canvas resolution to match its CSS display dimensions.*/
 function resizeCanvas() {
   const gameContainer = document.getElementById('gameWrap');
   const rect = gameContainer.getBoundingClientRect();
@@ -294,17 +288,15 @@ function resizeCanvas() {
 }
 window.addEventListener('resize', resizeCanvas);
 
-// =============================================================================
-// 2. MATHEMATICAL & GEOMETRIC UTILITIES
-// =============================================================================
+
+// 2. MATHEMATICAL CALCULATIONS//
 const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
 const getDistance = (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1);
 const getRandomRange = (min, max) => min + Math.random() * (max - min);
 
-// =============================================================================
-// 3. INPUT MANAGER
-// Tracks active keys and touch button interactions in real-time.
-// =============================================================================
+
+// 3. INPUT MANAGER//
+// Tracks active keys and touch button interactions in real-time.// 
 const inputState = { up: false, left: false, right: false };
 
 // Keyboard event bindings
@@ -322,8 +314,8 @@ window.addEventListener('keyup', (e) => {
   if (['ArrowRight', 'd', 'D'].includes(e.key)) inputState.right = false;
 });
 
-/**
- * Helper to bind touch/mouse hold listeners to mobile UI buttons.
+/*
+ Helper to bind touch/mouse hold listeners to mobile UI buttons.
  */
 function attachHoldListener(elementId, actionProperty) {
   const targetElement = document.getElementById(elementId);
@@ -350,10 +342,9 @@ attachHoldListener('tRotL', 'left');
 attachHoldListener('tRotR', 'right');
 document.getElementById('tPause').addEventListener('click', togglePause);
 
-// =============================================================================
-// 4. PARTICLE SYSTEM
-// Handles dust trails during thrusting and rain effects during weather events.
-// =============================================================================
+
+// 4. PARTICLE SYSTEM//
+// Handles dust trails during thrusting and rain effects during weather events.// 
 class Particle {
   constructor(x, y, vx, vy, lifeSpan, size, color) {
     this.x = x;
@@ -380,7 +371,7 @@ class Particle {
     context.beginPath();
     context.arc(this.x, this.y, Math.max(this.size, 0.4), 0, Math.PI * 2);
     context.fill();
-    context.globalAlpha = 1; // Reset opacity global
+    context.globalAlpha = 1; // Resets the opacity global
   }
 }
 
@@ -405,7 +396,7 @@ class ParticleSystem {
   }
 
   emitRain() {
-    if (this.particles.length > 260) return; // Prevent performance degradation
+    if (this.particles.length > 260) return; // Prevents  performance degradation
     this.particles.push(new Particle(
       Math.random() * canvasWidth, -10,
       getRandomRange(-20, -40),
@@ -433,10 +424,9 @@ class ParticleSystem {
 
 const particlePool = new ParticleSystem();
 
-// =============================================================================
-// 5. WEATHER CONTROLLER
-// Periodically alters environmental conditions (wind & rain).
-// =============================================================================
+ 
+// 5. WEATHER CONTROLLER//
+// Periodically alters environmental conditions (wind & rain).// 
 const weatherManager = {
   wind: { x: 0, y: 0 },
   isRaining: false,
@@ -462,10 +452,9 @@ const weatherManager = {
   }
 };
 
-// =============================================================================
-// 6. PLAYER ENTITY (Solar Drone)
-// Physics-driven drone class with battery consumption mechanics.
-// =============================================================================
+
+// 6. PLAYER ENTITY (Solar Drone)//
+// Physics-driven drone class with battery consumption mechanics.// 
 class DronePlayer {
   constructor() {
     this.x = 100;
@@ -588,10 +577,9 @@ class DronePlayer {
   }
 }
 
-// =============================================================================
+ 
 // 7. WORLD OBJECTS & HAZARDS
-// Class definitions for environmental objects.
-// =============================================================================
+// Class definitions for environmental objects.// 
 
 // Static hazard (Pothole): Damages battery upon contact
 class Pothole {
@@ -748,9 +736,8 @@ class DeliveryTarget {
 
 const DELIVERY_LOCATIONS = ['Village Clinic', 'Rural School', 'Community Hub', 'Market'];
 
-// =============================================================================
-// 8. GAME STATE & INITIALIZATION
-// =============================================================================
+
+// 8. GAME STATE & INITIALIZATION// 
 const gameState = {
   mode: 'start', // Modes: 'start' | 'playing' | 'paused' | 'gameover'
   score: 0,
@@ -826,10 +813,9 @@ function createNewTarget() {
   );
 }
 
-// =============================================================================
+
 // 9. COLLISION DETECTION HELPERS
-// Standard geometric intersection algorithms.
-// =============================================================================
+// Standard geometric intersection algorithms.// 
 
 // Circle vs Axis-Aligned Bounding Box (AABB) intersection detection
 function checkCircleRectCollision(circleX, circleY, radius, rect) {
@@ -843,10 +829,9 @@ function checkCircleCircleCollision(x1, y1, r1, x2, y2, r2) {
   return getDistance(x1, y1, x2, y2) < (r1 + r2);
 }
 
-// =============================================================================
+
 // 10. LOCAL STORAGE MANAGER
-// Handles persistent local high scores.
-// =============================================================================
+// Handles persistent local high scores.// 
 const SCORE_STORAGE_KEY = 'ecodash_best_score';
 const DISTANCE_STORAGE_KEY = 'ecodash_best_distance';
 
@@ -881,10 +866,9 @@ function updateMenuStatsUI() {
   document.getElementById('bestDistLabel').textContent = bests.dist;
 }
 
-// =============================================================================
+
 // 11. UPDATE STEP (GAME TICK)
-// Process physics, environmental effects, collisions, and state changes.
-// =============================================================================
+// Process physics, environmental effects, collisions, and state changes.// 
 function updateGame(dt) {
   gameState.frame++;
   gameState.elapsed += dt;
@@ -963,10 +947,10 @@ function handleGameOver(reason) {
   displayOverlay('gameOverScreen');
 }
 
-// =============================================================================
+
 // 12. RENDER PIPELINE
 // Handles Canvas drawing ops every frame.
-// =============================================================================
+
 function renderBackground() {
   ctx.fillStyle = '#8fd0a0';
   ctx.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -1054,10 +1038,10 @@ function renderScene() {
   renderHUD();
 }
 
-// =============================================================================
+
 // 13. MAIN ENGINE LOOP
 // Uses requestAnimationFrame for fixed delta-time smooth rendering.
-// =============================================================================
+// 
 let lastTimestamp = performance.now();
 
 function gameLoop(currentTimestamp) {
@@ -1073,9 +1057,9 @@ function gameLoop(currentTimestamp) {
   requestAnimationFrame(gameLoop);
 }
 
-// =============================================================================
+// 
 // 14. UI INTERACTION CONTROL
-// =============================================================================
+// 
 const overlayIds = ['startScreen', 'pauseScreen', 'gameOverScreen'];
 
 function displayOverlay(targetId) {
@@ -1118,9 +1102,9 @@ document.getElementById('quitBtn').addEventListener('click', () => {
   displayOverlay('startScreen');
 });
 
-// =============================================================================
+// 
 // 15. APPLICATION BOOTSTRAP
-// =============================================================================
+// 
 resizeCanvas();
 initGameWorld();
 updateMenuStatsUI();
